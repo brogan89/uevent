@@ -14,6 +14,24 @@ using Debug = UnityEngine.Debug;
 
 namespace UMessageSystem
 {
+	public enum MessageType
+	{
+		/// <summary>
+		/// The message with be sent to every client
+		/// </summary>
+		Everyone,
+		
+		/// <summary>
+		/// The message will only be sent to host
+		/// </summary>
+		HostOnly,
+		
+		/// <summary>
+		/// Message only gets sent to the owner who published it. Same as a non-networking publish
+		/// </summary>
+		OwnerOnly
+	}
+	
 	/// <summary>
 	/// A simple implementation of Event Bus system
 	///
@@ -85,9 +103,9 @@ namespace UMessageSystem
 		/// Publishes event to all subscribers
 		/// </summary>
 		/// <param name="eventMessage"></param>
-		/// <param name="hostOnly"></param>
+		/// <param name="messageType"></param>
 		/// <typeparam name="T"></typeparam>
-		public static void Publish<T>(T eventMessage, bool hostOnly = false) where T : IMessage
+		public static void Publish<T>(T eventMessage, MessageType messageType = MessageType.Everyone) where T : IMessage
 		{
 			if (eventMessage == null)
 				throw new NullReferenceException($"{nameof(eventMessage)} is null. Publish failed");
@@ -98,17 +116,21 @@ namespace UMessageSystem
 					$"IMessage should not be implemented by a {nameof(MonoBehaviour)}. Use custom classes only");
 
 #if NETWORKING
-			if (NetworkManager.Singleton && NetworkManager.Singleton.IsListening)
+			// if there is no networking manager then we default to owner only
+			if (!NetworkManager.Singleton || !NetworkManager.Singleton.IsListening)
+				messageType = MessageType.OwnerOnly;
+			
+			if (messageType == MessageType.Everyone || messageType == MessageType.HostOnly)
 			{
 				var packet = new Packet(eventMessage);
 				Log($"{nameof(Publish)}. packet: {packet}");
-				Instance.PublishServerRpc(packet, hostOnly);
+				Instance.PublishServerRpc(packet, messageType == MessageType.HostOnly);
 			}
 			else
 #endif
 			{
 				Log($"{nameof(Publish)}. eventMessage: {eventMessage}");
-				PublishInternal(eventMessage);
+				PublishOwnerOnly(eventMessage);
 			}
 		}
 		
@@ -117,7 +139,7 @@ namespace UMessageSystem
 		/// </summary>
 		/// <param name="eventMessage"></param>
 		/// <typeparam name="T"></typeparam>
-		private static void PublishInternal<T>(T eventMessage) where T : IMessage
+		private static void PublishOwnerOnly<T>(T eventMessage) where T : IMessage
 		{
 			if (eventMessage == null)
 				throw new NullReferenceException($"{nameof(eventMessage)} is null. Publish failed");
@@ -139,7 +161,7 @@ namespace UMessageSystem
 				}
 			}
 			
-			Log($"{nameof(PublishInternal)} completed. {sw.ElapsedMilliseconds}ms");
+			Log($"{nameof(PublishOwnerOnly)} completed. {sw.ElapsedMilliseconds}ms");
 			sw.Stop();
 		}
 #if NETWORKING
@@ -181,7 +203,7 @@ namespace UMessageSystem
 
 			if (eventMessage == null)
 			{
-				Debug.LogError($"Error deserialising packet. {packet.Data}");
+				LogError($"Error deserialising packet. {packet.Data}");
 				return;
 			}
 			
@@ -217,7 +239,7 @@ namespace UMessageSystem
 		
 		private static void LogError(string message)
 		{
-			Debug.Log($"<color=yellow>[MessageSystem]</color> {message}");
+			Debug.LogError($"<color=yellow>[MessageSystem]</color> {message}");
 		}
 	}
 }
