@@ -1,8 +1,32 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using MLAPI;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace UMessageSystem.Tests
+namespace UMessageSystem.Samples
 {
+	public class UMessageDemo : MonoBehaviour, ISubscriber<TestMessage>
+	{
+		public Text text;
+
+		private void Start()
+		{
+			UMessage.Bind(this);
+			NetworkManager.Singleton.StartHost();
+		}
+
+		public void Publish()
+		{
+			UMessage.Publish(TestMessage.NewMessage());
+		}
+
+		void ISubscriber<TestMessage>.OnPublished(TestMessage message)
+		{
+			Debug.Log($"Message Received: {message}");
+			text.text = message.ToString();
+		}
+	}
+
 	public class TestMessage : IMessage
 	{
 		public string Name;

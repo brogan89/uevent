@@ -2,7 +2,7 @@
     "name": "com.brogan89.umessage",
     "displayName": "UMessage",
     "description": "A pub/sub event messaging system for Unity with MLAPI support",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "unity": "2019.1",
     "keywords": [
       "Message",
@@ -10,5 +10,12 @@
     ],
     "dependencies": {
         "com.unity.multiplayer.mlapi": "https://github.com/Unity-Technologies/com.unity.multiplayer.mlapi.git?path=/com.unity.multiplayer.mlapi#release/0.1.0"
-    }
-  }
+    },
+    "samples": [
+      {
+        "displayName": "Demo",
+        "description": "Simple publish demo using MLAPI",
+        "path": "Samples~/Demo"
+      }
+    ]
+}

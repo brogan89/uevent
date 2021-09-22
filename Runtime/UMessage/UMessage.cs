@@ -14,7 +14,7 @@ using Debug = UnityEngine.Debug;
 
 namespace UMessageSystem
 {
-	public enum MessageType
+	public enum MessageType : byte
 	{
 		/// <summary>
 		/// The message with be sent to every client
@@ -123,8 +123,9 @@ namespace UMessageSystem
 			if (messageType == MessageType.Everyone || messageType == MessageType.HostOnly)
 			{
 				var packet = new Packet(eventMessage);
-				Log($"{nameof(Publish)}. packet: {packet}");
-				Instance.PublishServerRpc(packet, messageType == MessageType.HostOnly);
+				Log($"{nameof(Publish)}. packet ({messageType}): {packet}");
+				if (Instance)
+					Instance.PublishServerRpc(packet, messageType);
 			}
 			else
 #endif
@@ -167,9 +168,10 @@ namespace UMessageSystem
 #if NETWORKING
 		
 		[ServerRpc(RequireOwnership = false)]
-		private void PublishServerRpc(Packet packet, bool hostOnly)
+		private void PublishServerRpc(Packet packet, MessageType messageType)
 		{
-			if (hostOnly)
+			Log($"{nameof(PublishServerRpc)}. ({messageType}) {packet}");
+			if (messageType == MessageType.HostOnly)
 				MessageReceivedInternal(packet);
 			else
 				MessageReceivedClientRpc(packet);

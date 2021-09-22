@@ -7,7 +7,7 @@ namespace UMessageSystem
 	/// <summary>
 	/// Packet which is sent via MLAPI
 	/// </summary>
-	public class Packet : INetworkSerializable
+	public struct Packet : INetworkSerializable
 	{
 		public string TypeString;
 		public string Data;
@@ -15,7 +15,7 @@ namespace UMessageSystem
 		public Packet(IMessage message)
 		{
 			TypeString = GetTypeString(message.GetType());
-			Data = JsonUtility.ToJson(message, true);
+			Data = JsonUtility.ToJson(message);
 		}
 
 		public override string ToString()
@@ -34,9 +34,7 @@ namespace UMessageSystem
 		{
 			// needs to be in this format for Type.GetType()
 			// see: https://stackoverflow.com/questions/3512319/resolve-type-from-class-name-in-a-different-assembly
-			var path = $"{type.FullName}, {type.Assembly}";
-			Debug.Log($"Type Path: {path}");
-			return path;
+			return $"{type.FullName}, {type.Assembly}";
 		}
 
 		public void NetworkSerialize(NetworkSerializer serializer)
