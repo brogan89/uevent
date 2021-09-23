@@ -61,6 +61,8 @@ namespace UMessageSystem
 		/// </summary>
 		private static readonly List<ISubscriber> _Subs = new List<ISubscriber>();
 
+		[SerializeField] private bool _showLogs;
+
 		#region Sub/Unsub
 		
 		/// <summary>
@@ -151,15 +153,8 @@ namespace UMessageSystem
 			// make a copy as subs may be removed from the OnPublished callback
 			foreach (var sub in _Subs.ToArray())
 			{
-				switch (sub)
-				{
-					case MonoBehaviour m when !m:
-						Unsub(sub);
-						break;
-					case ISubscriber<T> s:
-						s.OnPublished(eventMessage);
-						break;
-				}
+				if (sub is ISubscriber<T> s)
+					s.OnPublished(eventMessage);
 			}
 			
 			Log($"{nameof(PublishOwnerOnly)} completed. {sw.ElapsedMilliseconds}ms");
@@ -208,20 +203,17 @@ namespace UMessageSystem
 				LogError($"Error deserialising packet. {packet.Data}");
 				return;
 			}
-			
-			// make a copy as subs may be removed from the OnPublished callback
-			foreach (var sub in _Subs.ToArray())
-			{
-				if (sub is MonoBehaviour m && !m)
-				{
-					Unsub(sub);
-					continue;
-				}
 
+			// make a copy as subs may be removed from the OnPublished callback
+			foreach (var sub in _Subs)
+			{
 				// get the type of ISubscriber<T>
 				var t = sub.GetType()
 					.GetInterfaces()
 					.SingleOrDefault(x => x.GenericTypeArguments.Length > 0 && x.GenericTypeArguments[0] == type);
+				
+				// if (t != null)
+					// Log($"Type: {t}. implemented by: {sub}");
 				
 				// the ISubscriber<T> will always have its one method so this should be safe
 				t?.GetMethods()[0].Invoke(sub, new[] {eventMessage});
@@ -236,7 +228,8 @@ namespace UMessageSystem
 
 		private static void Log(string message)
 		{
-			Debug.Log($"<color=yellow>[MessageSystem]</color> {message}");
+			if (!Instance || Instance._showLogs)
+				Debug.Log($"<color=yellow>[MessageSystem]</color> {message}");
 		}
 		
 		private static void LogError(string message)
