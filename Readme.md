@@ -12,16 +12,15 @@ The main benefit from using this system is that you don't need to apply a `Netwo
 ```csharp
 public class TestSubscriber : MonoBehaviour, ISubscriber<TestMessage>
 {
-    public bool ReceivedMessage;
-
     // subscribe this MonoBehaviour as a message receiver
 
     private void Start()
     {
+        // Binding will work for all ISubscriber<T>'s only need to do once at Start() or Awake()
         UMessage.Bind(this);
     }
 
-    // or 
+    // or you can bind manually incase its not a MonoBehaviour class
 
     private void OnEnabled()
     {
@@ -30,25 +29,43 @@ public class TestSubscriber : MonoBehaviour, ISubscriber<TestMessage>
 
     private void OnDisabled()
     {
-        UMessage.Sub(this);
+        UMessage.UnSub(this);
     }
     
-    // callback
+    // callbacks
 
+    // Direct interface ISubscriber<T> callback method
     void ISubscriber<TestMessage>.OnPublished(TestMessage message)
     {
-        Debug.Log($"TestSubscriber::TestMethod Received: {message}", this);
-        ReceivedMessage = true;
+        Debug.Log($"ISubscriber<TestMessage> message received: {message}", this);
+    }
+
+    // Attribute callbacks via GenericMessage class
+    // Method name matches the event name
+    [MessageCallback]
+    private void GenericMessage(string message)
+    {
+        Debug.Log($"GenericMessage message received: {message}", this);
+    }
+
+    // Method name doesn't match event name but event name is provided
+    [MessageCallback("GenericMessage")]
+    private void UnrelatedMethodName(string message)
+    {
+        Debug.Log($"UnrelatedMethodName message received: {message}", this);
     }
 }
 
 ...
 
+// IMessage event
 UMessage.Publish(new TestMessage());
 
+// Generic Message event
+UMessage.Publish("GenericMessage", "Hello, World!");
 ```
 
 # Limitations
 
 - Uses UnityEngine.JsonUtilities for json serialisation
-- Uses Reflection and LINQ when using networking to find ISubscriber{T}
+- Uses Reflection and LINQ when using networking to find ISubscriber{T} and method attributes
