@@ -42,14 +42,14 @@ public class TestSubscriber : MonoBehaviour, ISubscriber<TestMessage>
 
     // Attribute callbacks via GenericMessage class
     // Method name matches the event name
-    [MessageCallback]
+    [UMessageCallback]
     private void GenericMessage(string message)
     {
         Debug.Log($"GenericMessage message received: {message}", this);
     }
 
     // Method name doesn't match event name but event name is provided
-    [MessageCallback("GenericMessage")]
+    [UMessageCallback("GenericMessage")]
     private void UnrelatedMethodName(string message)
     {
         Debug.Log($"UnrelatedMethodName message received: {message}", this);

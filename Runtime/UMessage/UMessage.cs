@@ -275,7 +275,7 @@ namespace UMessageSystem
 			{
 				foreach (var methodInfo in subscriber.GetType().GetMethods(FLAGS))
 				{
-					foreach (var attribute in methodInfo.GetCustomAttributes<MessageCallbackAttribute>(false))
+					foreach (var attribute in methodInfo.GetCustomAttributes<UMessageCallbackAttribute>(false))
 					{
 						// return if the method name is the same as the event name
 						// otherwise use the custom event name set in constructor
