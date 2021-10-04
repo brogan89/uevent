@@ -2,6 +2,7 @@
 #define NETWORKING
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -66,9 +67,16 @@ namespace UMessageSystem
 		/// <summary>
 		/// List of subscribers
 		/// </summary>
-		private static readonly List<ISubscriber> _Subs = new List<ISubscriber>();
+		private static readonly ICollection<ISubscriber> _Subs = new List<ISubscriber>();
+		
+		/// <summary>
+		/// A list of subscribers that need to be unsubscribed.
+		/// Solves 'System.InvalidOperationException: Collection was modified; enumeration operation may not execute' 
+		/// </summary>
+		private static readonly ICollection<ISubscriber> _UnsubRegister = new List<ISubscriber>();
 		
 		[SerializeField] private bool _showLogs;
+		private static bool _isPublishing;
 		private static readonly Stopwatch sw = new Stopwatch();
 
 		#region Sub/Unsub
@@ -89,7 +97,10 @@ namespace UMessageSystem
 		/// <param name="sub"></param>
 		public static void Unsub(ISubscriber sub)
 		{
-			_Subs.Remove(sub);
+			if (_isPublishing)
+				_UnsubRegister.Add(sub);
+			else
+				_Subs.Remove(sub);
 		}
 
 		/// <summary>
@@ -244,6 +255,7 @@ namespace UMessageSystem
 		private static void InvokeMethods(object eventMessage, Type type)
 		{
 			sw.Restart();
+			_isPublishing = true;
 			
 			// cast as generic message so we know to check for custom generic attributes
 			var gm = eventMessage as GenericMessage;
@@ -253,12 +265,25 @@ namespace UMessageSystem
 				foreach (var method in GetMethods(sub, type, gm?.EventName))
 				{
 					var value = gm != null ? gm.GetValue() : eventMessage;
-					method?.Invoke(sub, value != null ? new[] { value } : null);
+					
+					if (method == null)
+						continue;
+
+					// handle coroutine if is one and sub is MonoBehaviour
+					if (method.ReturnType == typeof(IEnumerator) && sub is MonoBehaviour mono)
+						mono.StartCoroutine(method.Name, value);
+					else
+						method.Invoke(sub, value != null ? new[] { value } : null);
 				}
 			}
 			
 			Log($"{nameof(InvokeMethods)} completed. {sw.ElapsedMilliseconds}ms");
 			sw.Stop();
+			_isPublishing = false;
+
+			// unsubscribe any registered unsubs
+			foreach (var subscriber in _UnsubRegister)
+				Unsub(subscriber);
 		}
 		
 		/// <summary>
