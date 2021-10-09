@@ -5,17 +5,22 @@ using UnityEngine.UI;
 
 namespace UMessageSystem.Samples
 {
-	public class UMessageDemo : MonoBehaviour,
-		ISubscriber<TestMessage>
+	public class UMessageDemo : NetworkBehaviour, ISubscriber<TestMessage>
 	{
 		public Text text;
-
 		private const string CUSTOM_EVENT_NAME = "Another Event";
 		
 		private void Start()
 		{
-			NetworkManager.Singleton.StartHost();
 			UMessage.Bind(this);
+		}
+
+		public void ServerToggleChanged(bool isOn)
+		{
+			if (isOn)
+				NetworkManager.Singleton.StartHost();
+			else
+				NetworkManager.Singleton.StopHost();
 		}
 
 		public void Publish()
@@ -32,26 +37,26 @@ namespace UMessageSystem.Samples
 			text.text += value + "\n";
 		}
 
-		[MessageCallbackAttribute]
+		[UMessageCallback]
 		private void ParameterlessCallback()
 		{
 			SetText(nameof(ParameterlessCallback));
 		}
 		
-		[MessageCallbackAttribute(nameof(ParameterlessCallback))]
+		[UMessageCallback(nameof(ParameterlessCallback))]
 		private void ParameterlessRandomMethodName()
 		{
 			SetText(nameof(ParameterlessRandomMethodName));
 		}
 		
-		[MessageCallbackAttribute]
+		[UMessageCallback]
 		private void ParameterCallback(int value)
 		{
 			SetText($"{nameof(ParameterCallback)}: {value}");
 		}
 		
-		[MessageCallbackAttribute(nameof(ParameterCallback))]
-		[MessageCallbackAttribute(CUSTOM_EVENT_NAME)]
+		[UMessageCallback(nameof(ParameterCallback))]
+		[UMessageCallback(CUSTOM_EVENT_NAME)]
 		private void RandomMethodName(int value)
 		{
 			SetText($"{nameof(RandomMethodName)}: {value}");
