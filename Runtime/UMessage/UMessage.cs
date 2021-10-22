@@ -11,8 +11,7 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 #if NETWORKING
-using MLAPI;
-using MLAPI.Messaging;
+using Unity.Netcode;
 #endif
 
 namespace UMessageSystem

@@ -1,5 +1,5 @@
 ﻿using System;
-using MLAPI.Serialization;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace UMessageSystem
@@ -37,10 +37,10 @@ namespace UMessageSystem
 			return $"{type.FullName}, {type.Assembly}";
 		}
 
-		public void NetworkSerialize(NetworkSerializer serializer)
+		public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
 		{
-			serializer.Serialize(ref TypeString);
-			serializer.Serialize(ref Data);
+			serializer.SerializeValue(ref TypeString);
+			serializer.SerializeValue(ref Data);
 		}
 	}
 }

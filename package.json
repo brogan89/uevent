@@ -9,7 +9,7 @@
       "Events"
     ],
     "dependencies": {
-        "com.unity.multiplayer.mlapi": "https://github.com/Unity-Technologies/com.unity.multiplayer.mlapi.git?path=/com.unity.multiplayer.mlapi#release/0.1.0"
+        "com.unity.netcode.gameobjects": "1.0.0-pre.2"
     },
     "samples": [
       {
