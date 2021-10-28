@@ -1,17 +1,18 @@
 ﻿using System;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace UMessageSystem
 {
 	/// <summary>
-	/// Packet which is sent via MLAPI
+	/// Packet which is sent via netcode
 	/// </summary>
 	public struct Packet : INetworkSerializable
 	{
-		public string TypeString;
-		public string Data;
-
+		public FixedString512Bytes TypeString;
+		public FixedString4096Bytes Data;
+		
 		public Packet(IMessage message)
 		{
 			TypeString = GetTypeString(message.GetType());
@@ -25,9 +26,9 @@ namespace UMessageSystem
 
 		public bool IsValid()
 		{
-			return !string.IsNullOrEmpty(TypeString)
-			       && !string.IsNullOrEmpty(Data)
-			       && Data != "{}";
+			return !string.IsNullOrEmpty(TypeString.ToString())
+			       && !string.IsNullOrEmpty(Data.ToString())
+			       /*&& Data != "{}"*/;
 		}
 
 		private static string GetTypeString(Type type)

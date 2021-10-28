@@ -233,8 +233,8 @@ namespace UMessageSystem
 				return;
 			}
 
-			var type = Type.GetType(packet.TypeString);
-			var eventMessage = JsonUtility.FromJson(packet.Data, type);
+			var type = Type.GetType(packet.TypeString.ToString());
+			var eventMessage = JsonUtility.FromJson(packet.Data.ToString(), type);
 
 			if (eventMessage == null)
 			{
