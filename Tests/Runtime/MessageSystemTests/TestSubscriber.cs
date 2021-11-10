@@ -1,14 +1,29 @@
 using UnityEngine;
 
-namespace UMessageSystem.Tests
+namespace UEventSystem.Tests
 {
-	public class TestSubscriber : MonoBehaviour, ISubscriber<TestMessage>
+	public class TestSubscriber : MonoBehaviour
 	{
 		public bool ReceivedMessage;
-		
-		void ISubscriber<TestMessage>.OnPublished(TestMessage message)
+
+		private void Start()
 		{
-			Debug.Log($"TestSubscriber::TestMethod Received: {message}", this);
+			this.Bind<TestEvent>(OnEventInvoked);
+		}
+
+		private void OnEnable()
+		{
+			UEvent<TestEvent>.Event += OnEventInvoked;
+		}
+
+		private void OnDisable()
+		{
+			UEvent<TestEvent>.Event -= OnEventInvoked;
+		}
+
+		private void OnEventInvoked(TestEvent @event)
+		{
+			Debug.Log($"TestSubscriber::TestMethod Received: {@event}", this);
 			ReceivedMessage = true;
 		}
 	}

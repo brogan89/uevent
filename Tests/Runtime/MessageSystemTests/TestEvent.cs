@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace UMessageSystem.Tests
+namespace UEventSystem.Tests
 {
-	public class TestMessage : IMessage
+	public class TestEvent
 	{
 		public string Name;
 		public int Level;
@@ -16,9 +16,9 @@ namespace UMessageSystem.Tests
 			return JsonUtility.ToJson(this, true);
 		}
 		
-		public static TestMessage NewMessage()
+		public static TestEvent NewMessage()
 		{
-			var message = new TestMessage
+			var message = new TestEvent
 			{
 				Name = "Player 1",
 				Level = 69,

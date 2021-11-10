@@ -68,7 +68,7 @@ namespace UMessageSystem.Samples
 		}
 	}
 
-	public class TestMessage : IMessage
+	public class TestMessage
 	{
 		public string Name;
 		public int Level;

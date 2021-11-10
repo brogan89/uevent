@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
-namespace UMessageSystem.Tests
+namespace UEventSystem.Tests
 {
 	public class MessageTestRuntimeTests
 	{
@@ -17,30 +17,34 @@ namespace UMessageSystem.Tests
 			var mono = new GameObject(nameof(TestSubscriber)).AddComponent<TestSubscriber>();
 			var native = new TestSub();
 			
-			UMessage.Sub(mono);
-			UMessage.Sub(native);
-			
-			UMessage.Publish(TestMessage.NewMessage());
+			UEvent.Invoke(TestEvent.NewMessage());
 			
 			yield return new WaitForSeconds(1);
 			
 			Assert.IsTrue(mono.ReceivedMessage);
 			Assert.IsTrue(native.ReceivedMessage);
 			
-			UMessage.Unsub(mono);
-			UMessage.Unsub(native);
-			
 			Debug.Log("MessageTestRuntimeTests complete");
 		}
 	}
 
-	public class TestSub : ISubscriber<TestMessage>
+	public class TestSub
 	{
 		public bool ReceivedMessage;
 
-		void ISubscriber<TestMessage>.OnPublished(TestMessage message)
+		public TestSub()
 		{
-			Debug.Log($"TestSub::TestMessage message received: {message}");
+			UEvent<TestEvent>.Event += OnEventInvoked;
+		}
+
+		~TestSub()
+		{
+			UEvent<TestEvent>.Event -= OnEventInvoked;
+		}
+
+		private void OnEventInvoked(TestEvent @event)
+		{
+			Debug.Log($"TestSub::TestMessage message received: {@event}");
 			ReceivedMessage = true;
 		}
 	}
