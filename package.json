@@ -1,21 +1,12 @@
 {
-    "name": "com.brogan89.umessage",
-    "displayName": "UMessage",
-    "description": "A pub/sub event messaging system for Unity with MLAPI support",
-    "version": "1.2.2",
-    "unity": "2019.1",
+    "name": "com.brogan89.uevent",
+    "displayName": "UEvent",
+    "description": "A pub/sub event messaging system for Unity",
+    "version": "2.0.0",
+    "unity": "2018.4",
     "keywords": [
-      "Message",
       "Events"
     ],
-    "dependencies": {
-        "com.unity.netcode.gameobjects": "1.0.0-pre.2"
-    },
-    "samples": [
-      {
-        "displayName": "Demo",
-        "description": "Simple publish demo using MLAPI",
-        "path": "Samples~/Demo"
-      }
-    ]
+    "dependencies": {},
+    "samples": []
 }

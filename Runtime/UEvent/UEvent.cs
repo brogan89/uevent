@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace UEventSystem
 {
-	/// <summary>
-	/// A simple implementation of Event Bus system
-	/// </summary>
 	public class UEvent<T>
 	{
 		public static event Action<T> Event;
