@@ -5,43 +5,41 @@ A simple [pub sub event system](https://www.altexsoft.com/blog/event-driven-arch
 # Examples
 
 ```csharp
-public class TestMessage
+public class TestEvent
 {
     public string PlayerName { get; set; }
 }
 
 public class TestSubscriber : MonoBehaviour
 {
-    // subscribe this MonoBehaviour as a message receiver
-
+    // Bind this MonoBehaviour to a specific event
     private void Start()
     {
-        // Binding will work for all ISubscriber<T>'s only need to do once at Start() or Awake()
-        this.Bind<TestMessage>(TestMessageEvent);
-        this.Bind<string>(GenericMessage);
+        this.Bind<TestEvent>(TestEventCallback);
+        this.Bind<string>(GenericEventCallback);
     }
 
-    // or you can bind manually incase its not a MonoBehaviour class
+    // or you can assign/unassign manually, useful for non MonoBehaviour classes
     private void OnEnabled()
     {
-        UEvent<TestMessage>.Event += TestMessageEvent;
-        UEvent<string>.Event += GenericMessage;
+        UEvent<TestEvent>.Event += TestEventCallback;
+        UEvent<string>.Event += GenericEventCallback;
     }
 
     private void OnDisabled()
     {
-        UEvent<TestMessage>.Event -= TestMessageEvent;
-        UEvent<string>.Event -= GenericMessage;
+        UEvent<TestEvent>.Event -= TestEventCallback;
+        UEvent<string>.Event -= GenericEventCallback;
     }
     
     // callbacks
 
-    private void TestMessageEvent(TestMessage message)
+    private void TestEventCallback(TestEvent message)
     {
         Debug.Log($"{message.PlayerName} has entered the game", this);
     }
 
-    private void GenericMessage(string message)
+    private void GenericEventCallback(string message)
     {
         Debug.Log($"GenericMessage message received: {message}", this);
     }
@@ -50,8 +48,8 @@ public class TestSubscriber : MonoBehaviour
 ...
 
 // IMessage event
-UMessage.Publish(new TestMessage{ PlayerName = "Player One" });
+UEvent.Publish(new TestEvent{ PlayerName = "Player One" });
 
 // Generic Message event
-UMessage.Publish("Public service announcement");
+UEvent.Publish("Public service announcement");
 ```
