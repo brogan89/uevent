@@ -39,8 +39,11 @@ namespace UEventSystem
 		public static void Bind<T>(this MonoBehaviour monoBehaviour, Action<T> callback)
 		{
 			var binder = monoBehaviour.gameObject.AddComponent<EventBinder>();
-			binder.onEnabled = () => Add(callback);
-			binder.onDisabled = () => Remove(callback);
+			binder.MethodName = callback.Method.Name;
+			binder.enabled = false;
+			binder.onEnabled += () => Add(callback);
+			binder.onDisabled += () => Remove(callback);
+			binder.enabled = true;
 		}
 	}
 }
