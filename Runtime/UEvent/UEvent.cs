@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UEventSystem
@@ -15,9 +16,29 @@ namespace UEventSystem
 	
 	public static class UEvent
 	{
+		private static readonly Dictionary <string, List<Delegate>> _callbackMap = new();
+
 		public static void Invoke<T>(T value)
 		{
 			UEvent<T>.Invoke(value);
+		}
+		
+		public static void Invoke(string eventName)
+		{
+			if (!_callbackMap.ContainsKey(eventName))
+				return;
+
+			foreach (var callback in _callbackMap[eventName])
+				callback?.DynamicInvoke();
+		}
+		
+		public static void Invoke<T>(string eventName, T value)
+		{
+			if (!_callbackMap.ContainsKey(eventName))
+				return;
+
+			foreach (var callback in _callbackMap[eventName])
+				callback?.DynamicInvoke(value);
 		}
 
 		public static void Add<T>(Action<T> callback)
@@ -25,9 +46,37 @@ namespace UEventSystem
 			UEvent<T>.Event += callback;
 		}
 
+		public static void Add(string eventName, Action callback)
+		{
+			if (!_callbackMap.ContainsKey(eventName))
+				_callbackMap[eventName] = new List<Delegate>();
+			
+			_callbackMap[eventName].Add(callback);
+		}
+		
+		public static void Add<T>(string eventName, Action<T> callback)
+		{
+			if (!_callbackMap.ContainsKey(eventName))
+				_callbackMap[eventName] = new List<Delegate>();
+			
+			_callbackMap[eventName].Add(callback);
+		}
+
 		public static void Remove<T>(Action<T> callback)
 		{
 			UEvent<T>.Event -= callback;
+		}
+
+		public static void Remove(string eventName, Action callback)
+		{
+			if (_callbackMap.ContainsKey(eventName))
+				_callbackMap[eventName].Add(callback);
+		}
+		
+		public static void Remove<T>(string eventName, Action<T> callback)
+		{
+			if (_callbackMap.ContainsKey(eventName))
+				_callbackMap[eventName].Add(callback);
 		}
 
 		/// <summary>
@@ -38,11 +87,27 @@ namespace UEventSystem
 		/// <typeparam name="T"></typeparam>
 		public static void Bind<T>(this MonoBehaviour monoBehaviour, Action<T> callback)
 		{
+			CreateEventBinder(monoBehaviour,
+				callback.Method.Name,
+				() => Add(callback),
+				() => Remove(callback));
+		}
+
+		public static void Bind<T>(this MonoBehaviour monoBehaviour, string eventName, Action<T> callback)
+		{
+			CreateEventBinder(monoBehaviour,
+				callback.Method.Name,
+				() => Add(eventName, callback),
+				() => Remove(eventName, callback));
+		}
+
+		private static void CreateEventBinder(Component monoBehaviour, string callbackMethodName, Action enabledCallback, Action disabledCallback)
+		{
 			var binder = monoBehaviour.gameObject.AddComponent<EventBinder>();
-			binder.MethodName = callback.Method.Name;
+			binder.MethodName = callbackMethodName;
 			binder.enabled = false;
-			binder.onEnabled += () => Add(callback);
-			binder.onDisabled += () => Remove(callback);
+			binder.onEnabled += enabledCallback;
+			binder.onDisabled += disabledCallback;
 			binder.enabled = true;
 		}
 	}
