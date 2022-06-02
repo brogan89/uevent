@@ -93,6 +93,14 @@ namespace UEventSystem
 				() => Remove(callback));
 		}
 
+		public static void Bind(this MonoBehaviour monoBehaviour, string eventName, Action callback)
+		{
+			CreateEventBinder(monoBehaviour,
+				callback.Method.Name,
+				() => Add(eventName, callback),
+				() => Remove(eventName, callback));
+		}
+
 		public static void Bind<T>(this MonoBehaviour monoBehaviour, string eventName, Action<T> callback)
 		{
 			CreateEventBinder(monoBehaviour,

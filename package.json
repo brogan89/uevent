@@ -2,7 +2,7 @@
     "name": "com.brogan89.uevent",
     "displayName": "UEvent",
     "description": "A pub/sub event messaging system for Unity",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "unity": "2018.4",
     "keywords": [
       "Events"
