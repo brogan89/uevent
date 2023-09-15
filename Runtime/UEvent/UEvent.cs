@@ -29,7 +29,15 @@ namespace UEventSystem
 				return;
 
 			foreach (var callback in _callbackMap[eventName])
-				callback?.DynamicInvoke();
+			{
+				if (callback is null)
+					continue;
+				
+				if (callback.Method.GetParameters().Length != 0)
+					continue;
+				
+				callback.DynamicInvoke();
+			}
 		}
 		
 		public static void Invoke<T>(string eventName, T value)
@@ -38,7 +46,15 @@ namespace UEventSystem
 				return;
 
 			foreach (var callback in _callbackMap[eventName])
-				callback?.DynamicInvoke(value);
+			{
+				if (callback is null)
+					continue;
+				
+				if (callback.Method.GetParameters().Length != 1)
+					continue;
+				
+				callback.DynamicInvoke(value);
+			}
 		}
 
 		public static void Add<T>(Action<T> callback)
